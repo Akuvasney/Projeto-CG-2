@@ -57,6 +57,9 @@ void Model::initializeGL(GLuint program, std::string_view path ) {
   // End of binding to current VAO
   abcg::glBindVertexArray(0);
 
+  m_modelMatrixLoc = abcg::glGetUniformLocation(program, "modelMatrix");
+  m_colorLoc = abcg::glGetUniformLocation(program, "color");
+
 }
 
 
