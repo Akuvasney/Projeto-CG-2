@@ -72,6 +72,8 @@ void OpenGLWindow::initializeGL() {
   m_program = createProgramFromFile(getAssetsPath() + "lookat.vert",
                                     getAssetsPath() + "lookat.frag");
 
+  m_lamp.initializeGL(m_program, getAssetsPath() + "lamp.obj");
+
   m_ground.initializeGL(m_program);
   m_roof.initializeGL(m_program);
   m_leftwall.initializeGL(m_program);
@@ -79,8 +81,6 @@ void OpenGLWindow::initializeGL() {
   m_backwall.initializeGL(m_program);
   m_frontwall.initializeGL(m_program);
 
-  // Load model
-  loadModelFromFile(getAssetsPath() + "lamp.obj");
 
   // Generate VBO
   abcg::glGenBuffers(1, &m_VBO);
@@ -190,9 +190,6 @@ void OpenGLWindow::paintGL() {
       abcg::glGetUniformLocation(m_program, "viewMatrix")};
   const GLint projMatrixLoc{
       abcg::glGetUniformLocation(m_program, "projMatrix")};
-  const GLint modelMatrixLoc{
-      abcg::glGetUniformLocation(m_program, "modelMatrix")};
-  const GLint colorLoc{abcg::glGetUniformLocation(m_program, "color")};
 
   // Set uniform variables for viewMatrix and projMatrix
   // These matrices are used for every scene object
@@ -201,53 +198,7 @@ void OpenGLWindow::paintGL() {
   abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE,
                            &m_camera.m_projMatrix[0][0]);
 
-  abcg::glBindVertexArray(m_VAO);
-
- // Draw white bunny
-  glm::mat4 model{1.0f};
-  model = glm::translate(model, glm::vec3(-2.0f, 0.0f, -1.8f));
-  model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1, 0, 0));
-  model = glm::scale(model, glm::vec3(0.006f));
-
-  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(colorLoc, 1.0f, 0.8f, 0.0f, 1.0f);
-  abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT,
-                       nullptr);
-
-  // Draw yellow bunny
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3(-2.0f, 0.0f, 1.8f));
-  model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1, 0, 0));
-  model = glm::scale(model, glm::vec3(0.006f));
-
-  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(colorLoc, 1.0f, 0.8f, 0.0f, 1.0f);
-  abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT,
-                       nullptr);
-
-  // Draw blue bunny
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3(1.7f, 0.0f, -1.8f));
-  model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1, 0, 0));
-  model = glm::scale(model, glm::vec3(0.006f));
-
-  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(colorLoc, 1.0f, 0.8f, 0.0f, 1.0f);
-  abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT,
-                       nullptr);
-
-  // Draw red bunny
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3(1.7f, 0.0f, 1.8f));
-  model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1, 0, 0));
-  model = glm::scale(model, glm::vec3(0.006f));
-
-  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(colorLoc, 1.0f, 0.8f, 0.0f, 1.0f);
-  abcg::glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT,
-                       nullptr);
-
-  abcg::glBindVertexArray(0);
+  
 
   // Draw ground
   m_ground.paintGL();
@@ -286,6 +237,7 @@ void OpenGLWindow::terminateGL() {
   m_rightwall.terminateGL();
   m_backwall.terminateGL();
   m_frontwall.terminateGL();
+  m_lamp.terminateGL();
 
   abcg::glDeleteProgram(m_program);
   abcg::glDeleteBuffers(1, &m_EBO);
